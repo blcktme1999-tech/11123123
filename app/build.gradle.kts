@@ -1,8 +1,15 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
+val siteProps = Properties()
+val siteFile = rootProject.file("site.properties")
+if (siteFile.exists()) siteFile.inputStream().use { siteProps.load(it) }
+val siteUrl = (siteProps.getProperty("SITE_URL") ?: "https://new123-green-five.vercel.app").trim().trimEnd('/')
 
 android {
     namespace = "tw.cib.reader"
@@ -14,6 +21,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "SITE_URL", "\"$siteUrl\"")
     }
 
     buildTypes {
@@ -33,6 +41,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

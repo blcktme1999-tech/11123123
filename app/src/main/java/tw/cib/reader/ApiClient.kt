@@ -31,11 +31,13 @@ class ApiClient {
         cookies.clear()
     }
 
-    fun get(path: String): JSONObject = call(Request.Builder().url(BASE + path).get().build())
+    fun get(path: String): JSONObject = call(Request.Builder().url(base + path).get().build())
 
     fun post(path: String, body: JSONObject): JSONObject = call(
-        Request.Builder().url(BASE + path).post(body.toString().toRequestBody(jsonType)).build()
+        Request.Builder().url(base + path).post(body.toString().toRequestBody(jsonType)).build()
     )
+
+    private val base = BuildConfig.SITE_URL.trimEnd('/')
 
     private fun call(request: Request): JSONObject {
         client.newCall(request).execute().use { response ->
@@ -48,9 +50,6 @@ class ApiClient {
         }
     }
 
-    companion object {
-        const val BASE = "https://new123-green-five.vercel.app"
-    }
 }
 
 object ServiceApi {

@@ -291,9 +291,11 @@ const indexHtml = fs.readFileSync(path.join(chDir, 'index.html'), 'utf8');
 const pages = walk(chDir).map(pageDoc);
 const home = homeOf(indexHtml);
 const catalog = { menu: parseMenu(indexHtml), home, pages };
+const catalogText = JSON.stringify(catalog);
 const outDir = path.resolve(here, '..', 'app', 'src', 'main', 'assets');
 fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'catalog.json'), JSON.stringify(catalog));
+fs.writeFileSync(path.join(outDir, 'catalog.json'), catalogText);
+fs.writeFileSync(path.join(root, 'app-catalog.json'), catalogText);
 const bytes = fs.statSync(path.join(outDir, 'catalog.json')).size;
 console.log(JSON.stringify({
   pages: pages.length,

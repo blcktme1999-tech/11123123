@@ -1,8 +1,12 @@
 package tw.cib.reader
 
 import android.content.Context
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 data class MenuNode(val title: String, val target: String, val children: List<MenuNode>)
 
@@ -36,8 +40,33 @@ class Catalog(val menu: List<MenuNode>, val home: HomePage, val pages: Map<Strin
     val titles: List<PageDoc> = pages.values.sortedBy { it.title }
 
     companion object {
-        fun load(context: Context): Catalog {
-            val text = context.assets.open("catalog.json").bufferedReader().use { it.readText() }
+        fun load(context: Context): Catalog = parse(localText(context))
+
+        fun refresh(context: Context): Catalog? {
+            val url = BuildConfig.SITE_URL.trimEnd('/') + "/app-catalog.json"
+            val client = OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+            client.newCall(Request.Builder().url(url).header("Cache-Control", "no-cache").build()).execute().use { response ->
+                if (!response.isSuccessful) return null
+                val text = response.body?.string().orEmpty()
+                if (!text.trim().startsWith("{")) return null
+                JSONObject(text).getJSONArray("pages")
+                val file = File(context.filesDir, "catalog.json")
+                if (file.exists() && file.readText() == text) return null
+                file.writeText(text)
+                return parse(text)
+            }
+        }
+
+        private fun localText(context: Context): String {
+            val file = File(context.filesDir, "catalog.json")
+            if (file.exists() && file.length() > 0L) return file.readText()
+            return context.assets.open("catalog.json").bufferedReader().use { it.readText() }
+        }
+
+        private fun parse(text: String): Catalog {
             val root = JSONObject(text)
             val pages = buildMap {
                 val array = root.getJSONArray("pages")

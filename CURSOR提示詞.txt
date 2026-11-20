@@ -1,0 +1,10 @@
+把 site.properties 裡的 SITE_URL 改成這個網址，結尾不要加斜線：
+https://客戶的網站網址
+
+然後在這台電腦打包 debug 安裝檔，做出 https 下載連結和二維碼。
+
+電腦需要 JDK 17、Android SDK（Android 35）和 Gradle 8.11.1。專案裡要有 local.properties，內容是這台電腦的 SDK 路徑，例如 sdk.dir=C:\\Android\\sdk。
+
+打包完成後，安裝檔在 app\build\outputs\apk\debug\app-debug.apk。把這個檔案分享成 https 連結，並把連結做成二維碼圖片。電腦要保持開機並且有網路，對方才下載得到。
+
+不要改網站倉庫，不要把 apk 放進 Git。案件、報案、查詢、登入和筆錄會連 SITE_URL。新聞和文章在 App 下次打開時，從這個網址的 /app-catalog.json 下載；下載失敗就用安裝檔裡的舊清單。
